@@ -1,5 +1,7 @@
 ## Architecture
 
+* See [docs/project-architecture.md](docs/project-architecture.md) for detailed architecture documentation.
+
 ## Tools
 
 * Use `pnpm` (globally installed), not `npm`
