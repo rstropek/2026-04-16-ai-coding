@@ -9,6 +9,6 @@ public class PingIntegrationTest(WebApiTestFixture fixture) : IClassFixture<WebA
         response.EnsureSuccessStatusCode();
 
         var content = await response.Content.ReadAsStringAsync();
-        Assert.Equal("pong", content);
+        Assert.Equal("\"pong\"", content);
     }
 }
