@@ -1,0 +1,72 @@
+@if (loading()) {
+  <p class="status-message">Loading questionnaire&hellip;</p>
+}
+
+@if (error(); as err) {
+  <p class="error-message" role="alert">{{ err }}</p>
+}
+
+@if (submitted()) {
+  <div class="success-card" role="status">
+    <div class="success-icon">
+      <fa-icon [icon]="faCheck" aria-hidden="true" />
+    </div>
+    <h2>Thank you!</h2>
+    <p>Your answers have been submitted successfully.</p>
+    <a routerLink="/questionnaires" class="btn-primary">Back to Questionnaires</a>
+  </div>
+} @else if (questionnaire(); as q) {
+  <header class="page-header">
+    <h1>{{ q.title }}</h1>
+    <p class="version-info">Version {{ q.version }}</p>
+  </header>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+    @for (question of q.questions; track question.id) {
+      <div class="answer-field">
+        <label [for]="question.id">
+          {{ question.text }}
+          @if (question.isRequired) {
+            <span class="required-mark" aria-label="required">*</span>
+          }
+        </label>
+
+        @switch (question.type) {
+          @case ('Text') {
+            <input
+              [id]="question.id"
+              type="text"
+              [formControlName]="question.id"
+              [attr.aria-required]="question.isRequired"
+              autocomplete="off"
+            />
+            @if (form.controls[question.id]?.invalid && form.controls[question.id]?.touched) {
+              <span class="field-error" role="alert">This field is required.</span>
+            }
+          }
+          @case ('Boolean') {
+            <label class="checkbox-label" [for]="question.id + '-cb'">
+              <input
+                [id]="question.id + '-cb'"
+                type="checkbox"
+                [formControlName]="question.id"
+              />
+              Yes
+            </label>
+          }
+        }
+      </div>
+    }
+
+    <div class="form-actions">
+      <a routerLink="/questionnaires" class="btn-secondary">Cancel</a>
+      <button type="submit" class="btn-primary" [disabled]="submitting()">
+        @if (submitting()) {
+          Submitting&hellip;
+        } @else {
+          Submit Answers
+        }
+      </button>
+    </div>
+  </form>
+}

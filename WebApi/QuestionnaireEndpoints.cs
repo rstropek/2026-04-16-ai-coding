@@ -18,10 +18,10 @@ public static class QuestionnaireEndpoints
         .WithDescription("Creates a new questionnaire")
         .Produces<QuestionnaireDto>(StatusCodes.Status201Created);
 
-        group.MapGet("/", (IQuestionnaireRepository repo) =>
-            Results.Ok(repo.ListQuestionnaires()))
+        group.MapGet("/", (bool? includeDeleted, IQuestionnaireRepository repo) =>
+            Results.Ok(repo.ListQuestionnaires(includeDeleted ?? false)))
         .WithName("ListQuestionnaires")
-        .WithDescription("Lists all non-deleted questionnaires")
+        .WithDescription("Lists questionnaires, optionally including soft-deleted ones")
         .Produces<List<QuestionnaireDto>>(StatusCodes.Status200OK);
 
         group.MapGet("/{id:guid}", (Guid id, IQuestionnaireRepository repo) =>
@@ -61,6 +61,16 @@ public static class QuestionnaireEndpoints
         })
         .WithName("DeleteQuestionnaire")
         .WithDescription("Soft-deletes a questionnaire")
+        .Produces(StatusCodes.Status204NoContent)
+        .Produces(StatusCodes.Status404NotFound);
+
+        group.MapPost("/{id:guid}/restore", (Guid id, IQuestionnaireRepository repo) =>
+        {
+            var restored = repo.RestoreQuestionnaire(id);
+            return restored ? Results.NoContent() : Results.NotFound();
+        })
+        .WithName("RestoreQuestionnaire")
+        .WithDescription("Restores a soft-deleted questionnaire")
         .Produces(StatusCodes.Status204NoContent)
         .Produces(StatusCodes.Status404NotFound);
 

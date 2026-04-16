@@ -21,6 +21,7 @@ public record QuestionnaireDto(
     string Title,
     List<QuestionDto> Questions,
     int Version,
+    bool IsDeleted,
     DateTime CreatedAt,
     DateTime UpdatedAt);
 

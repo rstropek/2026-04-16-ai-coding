@@ -55,13 +55,14 @@ public class QuestionnaireRepository : IQuestionnaireRepository
             : null;
     }
 
-    public List<QuestionnaireDto> ListQuestionnaires()
+    public List<QuestionnaireDto> ListQuestionnaires(bool includeDeleted = false)
     {
         var result = new List<QuestionnaireDto>();
 
         foreach (var (id, version) in _latestVersions)
         {
-            if (_questionnaires.TryGetValue((id, version), out var questionnaire) && !questionnaire.IsDeleted)
+            if (_questionnaires.TryGetValue((id, version), out var questionnaire)
+                && (includeDeleted || !questionnaire.IsDeleted))
             {
                 result.Add(ToDto(questionnaire));
             }
@@ -117,6 +118,25 @@ public class QuestionnaireRepository : IQuestionnaireRepository
             }
 
             _questionnaires[(id, version)] = questionnaire with { IsDeleted = true, UpdatedAt = DateTime.UtcNow };
+            return true;
+        }
+    }
+
+    public bool RestoreQuestionnaire(Guid id)
+    {
+        lock (_lock)
+        {
+            if (!_latestVersions.TryGetValue(id, out var version))
+            {
+                return false;
+            }
+
+            if (!_questionnaires.TryGetValue((id, version), out var questionnaire) || !questionnaire.IsDeleted)
+            {
+                return false;
+            }
+
+            _questionnaires[(id, version)] = questionnaire with { IsDeleted = false, UpdatedAt = DateTime.UtcNow };
             return true;
         }
     }
@@ -177,7 +197,7 @@ public class QuestionnaireRepository : IQuestionnaireRepository
 
     private static QuestionnaireDto ToDto(Questionnaire q) =>
         new(q.Id, q.Title, [.. q.Questions.Select(qu => new QuestionDto(qu.Id, qu.Text, qu.Type, qu.IsRequired))],
-            q.Version, q.CreatedAt, q.UpdatedAt);
+            q.Version, q.IsDeleted, q.CreatedAt, q.UpdatedAt);
 
     private static AnswerSubmissionDto ToSubmissionDto(AnswerSubmission a) =>
         new(a.Id, a.QuestionnaireId, a.Version,

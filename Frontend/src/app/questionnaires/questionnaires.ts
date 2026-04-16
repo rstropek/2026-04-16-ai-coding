@@ -1,28 +1,46 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { DatePipe } from '@angular/common';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import {
+  faPlus,
+  faPenToSquare,
+  faReply,
+  faTrash,
+  faTrashArrowUp,
+} from '@fortawesome/free-solid-svg-icons';
+import { QuestionnaireService } from '../services/questionnaire.service';
 
 @Component({
   selector: 'app-questionnaires',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <h1>Questionnaires</h1>
-    <p>Manage your questionnaires here.</p>
-  `,
-  styles: `
-    :host {
-      display: block;
-      padding: 2rem 0;
-    }
-
-    h1 {
-      font-size: 1.75rem;
-      font-weight: 600;
-      margin-bottom: 0.5rem;
-      color: var(--color-text);
-    }
-
-    p {
-      color: var(--color-text-muted);
-    }
-  `,
+  imports: [RouterLink, DatePipe, FontAwesomeModule],
+  templateUrl: './questionnaires.html',
+  styleUrl: './questionnaires.css',
 })
-export class Questionnaires {}
+export class Questionnaires implements OnInit {
+  protected readonly service = inject(QuestionnaireService);
+
+  protected readonly faPlus = faPlus;
+  protected readonly faPenToSquare = faPenToSquare;
+  protected readonly faReply = faReply;
+  protected readonly faTrash = faTrash;
+  protected readonly faTrashArrowUp = faTrashArrowUp;
+
+  ngOnInit() {
+    this.service.loadQuestionnaires();
+  }
+
+  onToggleDeleted() {
+    this.service.includeDeleted.update(v => !v);
+    this.service.loadQuestionnaires();
+  }
+
+  onDelete(id: string) {
+    this.service.deleteQuestionnaire(id);
+  }
+
+  onRestore(id: string) {
+    this.service.restoreQuestionnaire(id);
+  }
+}

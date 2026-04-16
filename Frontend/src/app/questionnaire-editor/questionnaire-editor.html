@@ -1,0 +1,117 @@
+<header class="page-header">
+  <h1>@if (isEditMode()) { Edit Questionnaire } @else { New Questionnaire }</h1>
+</header>
+
+@if (loadError(); as err) {
+  <p class="error-message" role="alert">{{ err }}</p>
+}
+
+@if (loading() && isEditMode() && questionsArray.length === 0) {
+  <p class="status-message">Loading&hellip;</p>
+} @else {
+  <form [formGroup]="form" (ngSubmit)="onSave()" novalidate>
+    <div class="form-field">
+      <label for="title">Title</label>
+      <input
+        id="title"
+        formControlName="title"
+        type="text"
+        placeholder="Enter questionnaire title"
+        autocomplete="off"
+      />
+      @if (form.controls.title.invalid && form.controls.title.touched) {
+        <span class="field-error" role="alert">Title is required.</span>
+      }
+    </div>
+
+    <section class="questions-section" formArrayName="questions">
+      <h2>Questions</h2>
+
+      @for (question of questionsArray.controls; track $index; let i = $index) {
+        <fieldset class="question-card" [formGroupName]="i">
+          <legend class="sr-only">Question {{ i + 1 }}</legend>
+          <span class="question-number" aria-hidden="true">{{ i + 1 }}</span>
+
+          <div class="question-body">
+            <div class="form-field">
+              <label [for]="'q-text-' + i">Question text</label>
+              <input
+                [id]="'q-text-' + i"
+                formControlName="text"
+                type="text"
+                placeholder="Enter your question"
+                autocomplete="off"
+              />
+              @if (question.controls.text.invalid && question.controls.text.touched) {
+                <span class="field-error" role="alert">Question text is required.</span>
+              }
+            </div>
+
+            <div class="form-row">
+              <div class="form-field form-field--type">
+                <label [for]="'q-type-' + i">Type</label>
+                <select [id]="'q-type-' + i" formControlName="type">
+                  <option value="Text">Text</option>
+                  <option value="Boolean">Yes / No</option>
+                </select>
+              </div>
+
+              <label class="checkbox-field">
+                <input type="checkbox" formControlName="isRequired" />
+                Required
+              </label>
+            </div>
+          </div>
+
+          <div class="question-actions">
+            <button
+              type="button"
+              class="icon-btn"
+              (click)="moveUp(i)"
+              [disabled]="i === 0"
+              aria-label="Move question up"
+            >
+              <fa-icon [icon]="faArrowUp" aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              class="icon-btn"
+              (click)="moveDown(i)"
+              [disabled]="i === questionsArray.length - 1"
+              aria-label="Move question down"
+            >
+              <fa-icon [icon]="faArrowDown" aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              class="icon-btn icon-btn--danger"
+              (click)="removeQuestion(i)"
+              [disabled]="questionsArray.length <= 1"
+              aria-label="Remove question"
+            >
+              <fa-icon [icon]="faXmark" aria-hidden="true" />
+            </button>
+          </div>
+        </fieldset>
+      }
+
+      <button type="button" class="btn-secondary" (click)="addQuestion()">
+        <fa-icon [icon]="faPlus" aria-hidden="true" />
+        Add Question
+      </button>
+    </section>
+
+    <div class="form-actions">
+      <button type="button" class="btn-secondary" (click)="onCancel()">Cancel</button>
+      <button type="submit" class="btn-primary" [disabled]="loading()">
+        @if (loading()) {
+          Saving&hellip;
+        } @else if (isEditMode()) {
+          Save Changes
+        } @else {
+          Create Questionnaire
+        }
+      </button>
+    </div>
+  </form>
+}

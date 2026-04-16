@@ -1,0 +1,96 @@
+<header class="page-header">
+  <h1>Questionnaires</h1>
+  <div class="toolbar">
+    <label class="toggle-label">
+      <input
+        type="checkbox"
+        [checked]="service.includeDeleted()"
+        (change)="onToggleDeleted()"
+      />
+      Show deleted
+    </label>
+    <a routerLink="/questionnaires/new" class="btn-primary">
+      <fa-icon [icon]="faPlus" aria-hidden="true" />
+      New Questionnaire
+    </a>
+  </div>
+</header>
+
+@if (service.loading()) {
+  <p class="status-message">Loading questionnaires&hellip;</p>
+}
+
+@if (service.error(); as err) {
+  <p class="error-message" role="alert">{{ err }}</p>
+}
+
+@if (!service.loading()) {
+  <div class="table-wrapper">
+    <table class="questionnaire-table" aria-label="Questionnaires">
+      <thead>
+        <tr>
+          <th scope="col">Title</th>
+          <th scope="col">Version</th>
+          <th scope="col">Updated</th>
+          <th scope="col">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (q of service.questionnaires(); track q.id) {
+          <tr [class.deleted-row]="q.isDeleted">
+            <td>
+              <span [class.deleted-title]="q.isDeleted">{{ q.title }}</span>
+              @if (q.isDeleted) {
+                <span class="deleted-badge" aria-label="Deleted">deleted</span>
+              }
+            </td>
+            <td>v{{ q.version }}</td>
+            <td>{{ q.updatedAt | date:'mediumDate' }}</td>
+            <td class="actions-cell">
+              @if (!q.isDeleted) {
+                <a
+                  [routerLink]="['/questionnaires', q.id, 'edit']"
+                  class="action-btn"
+                  [attr.aria-label]="'Edit ' + q.title"
+                >
+                  <fa-icon [icon]="faPenToSquare" aria-hidden="true" />
+                </a>
+                <a
+                  [routerLink]="['/questionnaires', q.id, 'answer']"
+                  class="action-btn action-btn--answer"
+                  [attr.aria-label]="'Answer ' + q.title"
+                >
+                  <fa-icon [icon]="faReply" aria-hidden="true" />
+                </a>
+                <button
+                  type="button"
+                  class="action-btn action-btn--danger"
+                  (click)="onDelete(q.id)"
+                  [attr.aria-label]="'Delete ' + q.title"
+                >
+                  <fa-icon [icon]="faTrash" aria-hidden="true" />
+                </button>
+              } @else {
+                <button
+                  type="button"
+                  class="action-btn action-btn--restore"
+                  (click)="onRestore(q.id)"
+                  [attr.aria-label]="'Restore ' + q.title"
+                >
+                  <fa-icon [icon]="faTrashArrowUp" aria-hidden="true" />
+                  Restore
+                </button>
+              }
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="4" class="empty-state">
+              No questionnaires found. Create one to get started.
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}
