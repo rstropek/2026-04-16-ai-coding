@@ -1,1 +1,48 @@
-/* You can add global styles to this file, and also import other style files */
+:root {
+  --color-primary: #1a6b4e;
+  --color-primary-light: #238463;
+  --color-primary-dark: #12503b;
+  --color-accent: #e8913a;
+  --color-bg: #f7f8fa;
+  --color-surface: #ffffff;
+  --color-text: #1e1e2a;
+  --color-text-muted: #5c5c6f;
+  --color-border: #dcdde2;
+  --color-nav-bg: #1e1e2a;
+  --color-nav-text: #c8c8d4;
+  --color-nav-active: #ffffff;
+  --color-nav-hover: #e0e0ea;
+  --font-family: 'DM Sans', sans-serif;
+  --max-content-width: 1280px;
+  --nav-height: 56px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-family);
+  color: var(--color-text);
+  background: var(--color-bg);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--color-primary-light);
+}
